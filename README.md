@@ -1,4 +1,4 @@
-# Super-BPD: Super Boundary-to-Pixel Direction for Fast Image Segmentation (CVPR 2020)
+# Super-BPD for Fast Image Segmentation (CVPR 2020)
 
 ## Introduction
 
