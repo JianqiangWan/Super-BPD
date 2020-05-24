@@ -9,7 +9,7 @@ We propose direction-based super-BPD, an alternative to superpixel, for fast gen
 
 ## Testing
 
-* Download the pre-trained [PascalContext model](http://vllab.ucmerced.edu/ytsai/CVPR18/GTA2Cityscapes_multi-ed35151c.pth) and put it in the `saved` folder.
+* Download the pre-trained [PascalContext model](https://drive.google.com/file/d/1d-bkw7CURrmVwjpMvVb_QbSlIwhj-glS/view?usp=sharing) and put it in the `saved` folder.
 
 * Test the model and results will be saved in the `test_pred_flux/PascalContext` folder.
 
