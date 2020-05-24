@@ -9,7 +9,7 @@ const uint32_t REPLUSIVE_INIT = 2147483648;
 
 std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor,\
 torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> \
-bpd_cuda(const torch::Tensor input_angles, const int height, const int width);
+bpd_cuda(const torch::Tensor input_angles, const int height, const int width, const float theta_a, const float S_o);
 
 torch::Tensor bpd_cuda_final_step(const int height, const int width, torch::Tensor connect_marks, torch::Tensor edge_h, \
                                   torch::Tensor edge_w, torch::Tensor unique_super_BPDs, torch::Tensor super_BPDs);
@@ -26,7 +26,9 @@ torch::Tensor bpd_cpu_forward(
     torch::Tensor edge_h,
     torch::Tensor edge_w,
     torch::Tensor bnd_angle_diff,
-    torch::Tensor replusive_matrix) {
+    torch::Tensor replusive_matrix,
+    const float theta_l,
+    const float theta_s) {
 
     int num_edges = edge_h.numel();                     
     int num_superpixels = replusive_matrix.size(0);     
@@ -59,8 +61,8 @@ torch::Tensor bpd_cpu_forward(
         int value = REPLUSIVE_INIT >> inter_w;
 
         if ((min_area > 250) && !(replusive_matrix_ptr[index_h*nums_32 + inter_h] & value)) {
-            if (min_area > 1500) thresh = 70*PI/180;
-            else thresh = 110*PI/180;
+            if (min_area > 1500) thresh = PI - theta_l*PI/180;
+            else thresh = PI - theta_s*PI/180;
 
             if (bnd_angle_diff_ptr[i] < thresh) {
                 connect_marks_ptr[i] = 1;
@@ -112,10 +114,14 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> \
 forward(
     torch::Tensor input_angles,
     const int height,
-    const int width) {
+    const int width,
+    const float theta_a,
+    const float theta_l,
+    const float theta_s,
+    const float S_o) {
     
     CHECK_INPUT(input_angles);
-    auto cuda_return_tuple_results = bpd_cuda(input_angles, height, width);
+    auto cuda_return_tuple_results = bpd_cuda(input_angles, height, width, theta_a, S_o);
     auto unique_super_BPDs_counts = std::get<0>(cuda_return_tuple_results);
     auto edge_h = std::get<1>(cuda_return_tuple_results);
     auto edge_w = std::get<2>(cuda_return_tuple_results);
@@ -129,7 +135,7 @@ forward(
     auto super_BPDs = std::get<9>(cuda_return_tuple_results);
 
     auto connect_marks = bpd_cpu_forward(unique_super_BPDs_counts, edge_h, \
-    edge_w, bnd_angle_diff, replusive_matrix);
+    edge_w, bnd_angle_diff, replusive_matrix, theta_l, theta_s);
 
     auto final_result = bpd_cuda_final_step(height, width, connect_marks, edge_h, edge_w, unique_super_BPDs, super_BPDs);
 

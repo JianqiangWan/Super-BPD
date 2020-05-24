@@ -1,3 +1,5 @@
+import argparse
+import os
 import torch
 import torch.nn as nn
 from model import VGG16
@@ -7,11 +9,26 @@ from torch.utils.data import Dataset, DataLoader
 
 INI_LEARNING_RATE = 1e-5
 WEIGHT_DECAY = 5e-4
-EPOCHES = 1e5
-#DATASET = 'BSDS500'
+EPOCHES = 10000
 DATASET = 'PascalContext'
 SNAPSHOT_DIR = './snapshots/'
-TRAIN_DEBUG_VIS_DIR = './train_debug_vis/' + DATASET
+TRAIN_DEBUG_VIS_DIR = './train_debug_vis/'
+
+def get_arguments():
+    """Parse all the arguments provided from the CLI.
+    Returns:
+      A list of parsed arguments.
+    """
+    parser = argparse.ArgumentParser(description="Super-BPD Network")
+    parser.add_argument("--dataset", type=str, default=DATASET,
+                        help="Dataset for training.")
+    parser.add_argument("--train-debug-vis-dir", type=str, default=TRAIN_DEBUG_VIS_DIR,
+                        help="Directory for saving vis results during training.")
+    parser.add_argument("--snapshot-dir", type=str, default=SNAPSHOT_DIR,
+                        help="Where to save snapshots of the model.")
+    return parser.parse_args()
+
+args = get_arguments()
 
 def loss_calc(pred_flux, gt_flux, weight_matrix):
 
@@ -53,7 +70,6 @@ def get_params(model, key, bias=False):
                     else:
                         yield m[1].bias
 
-
 def adjust_learning_rate(optimizer, step):
     
     if step == 8e4:
@@ -62,11 +78,11 @@ def adjust_learning_rate(optimizer, step):
 
 def main():
 
-    if not os.path.exists(SNAPSHOT_DIR):
-        os.makedirs(SNAPSHOT_DIR)
+    if not os.path.exists(args.snapshot_dir):
+        os.makedirs(args.snapshot_dir)
 
-    if not os.path.exists(TRAIN_DEBUG_VIS_DIR):
-        os.makedirs(TRAIN_DEBUG_VIS_DIR)
+    if not os.path.exists(args.train_debug_vis_dir + args.dataset):
+        os.makedirs(args.train_debug_vis_dir + args.dataset)
 
     model = VGG16()
 
@@ -105,7 +121,7 @@ def main():
         weight_decay=WEIGHT_DECAY
     )
 
-    dataloader = DataLoader(FluxSegmentationDataset(dataset=DATASET, mode='train'), batch_size=1, shuffle=True, num_workers=4)
+    dataloader = DataLoader(FluxSegmentationDataset(dataset=args.dataset, mode='train'), batch_size=1, shuffle=True, num_workers=4)
 
     global_step = 0
 
@@ -134,10 +150,10 @@ def main():
                        epoch, i_iter, int(dataset_lendth.data), norm_loss, angle_loss))
                 
             if global_step % 500 == 0:
-                vis_flux(vis_image, pred_flux, gt_flux, gt_mask, image_name, TRAIN_DEBUG_VIS_DIR)
+                vis_flux(vis_image, pred_flux, gt_flux, gt_mask, image_name, args.train_debug_vis_dir + args.dataset + '/')
 
             if global_step % 1e4 == 0:
-                torch.save(model.state_dict(), SNAPSHOT_DIR + DATASET + '_' + str(global_step) + '.pth')
+                torch.save(model.state_dict(), args.snapshot_dir + args.dataset + '_' + str(global_step) + '.pth')
 
 if __name__ == '__main__':
     main()

@@ -17,6 +17,7 @@ __global__ void find_parents(
     const int nthreads,
     const int height,
     const int width,
+    const float theta_a,
     const torch::PackedTensorAccessor32<float,2,torch::RestrictPtrTraits> input_angles,
     torch::PackedTensorAccessor32<int,3,torch::RestrictPtrTraits> parents,
     torch::PackedTensorAccessor32<int,2,torch::RestrictPtrTraits> roots) {
@@ -44,7 +45,7 @@ __global__ void find_parents(
     float angle_diff = abs(curr_angle - next_angle);
     angle_diff = min(angle_diff, 2*PI - angle_diff);
 
-    if (angle_diff > PI/4) {
+    if (angle_diff > theta_a * PI / 180) {
         parents[0][curr_h][curr_w] = curr_h;
         parents[1][curr_h][curr_w] = curr_w;
         roots[curr_h][curr_w] = 1;
@@ -173,6 +174,7 @@ __global__ void classify_edges(
     const int nthreads,
     const int num_superpixels,
     const int nums,
+    const float S_o,
     torch::PackedTensorAccessor32<float,2,torch::RestrictPtrTraits> bnd_angle_diff,
     torch::PackedTensorAccessor32<int,2,torch::RestrictPtrTraits> bnd_pair_nums,
     torch::PackedTensorAccessor32<bool,2,torch::RestrictPtrTraits> select_matrix,
@@ -189,7 +191,7 @@ __global__ void classify_edges(
         float avg_angle_diff = bnd_angle_diff[curr_h][curr_w] / bnd_pair_nums[curr_h][curr_w];
         bnd_angle_diff[curr_h][curr_w] = avg_angle_diff;
 
-        if (avg_angle_diff > 170*PI/180) {
+        if (avg_angle_diff > PI - S_o * PI / 180) {
 
             int inter_h = curr_w / 32;
             int inter_w = curr_w % 32;
@@ -226,7 +228,7 @@ __global__ void final_step(
 
 std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, \
 torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> \
-bpd_cuda(const torch::Tensor input_angles, const int height, const int width) {
+bpd_cuda(const torch::Tensor input_angles, const int height, const int width, const float theta_a, const float S_o) {
 
 const int kThreadsPerBlock = 1024;
 const int blocks = (height*width + kThreadsPerBlock - 1) / kThreadsPerBlock;
@@ -239,6 +241,7 @@ find_parents<<<blocks, kThreadsPerBlock>>>(
     height*width,
     height,
     width,
+    theta_a,
     input_angles.packed_accessor32<float,2,torch::RestrictPtrTraits>(),
     parents.packed_accessor32<int,3,torch::RestrictPtrTraits>(),
     roots.packed_accessor32<int,2,torch::RestrictPtrTraits>()
@@ -317,6 +320,7 @@ classify_edges<<<blocks2, kThreadsPerBlock>>>(
     num_superpixels*num_superpixels,
     num_superpixels,
     nums,
+    S_o,
     bnd_angle_diff.packed_accessor32<float,2,torch::RestrictPtrTraits>(),
     bnd_pair_nums.packed_accessor32<int,2,torch::RestrictPtrTraits>(),
     select_matrix.packed_accessor32<bool,2,torch::RestrictPtrTraits>(),
