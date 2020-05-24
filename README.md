@@ -5,7 +5,7 @@
 We propose direction-based super-BPD, an alternative to superpixel, for fast generic image segmentation, achieving state-of-the-art real-time result.
 
 ## Dataset
-* Download the [BSDS500  & PascalContext Dataset](https://1drv.ms/u/s!AtAJxn0z15QehBRUdGCzWZq9AN59), and unzip it in the `Super-BPD/data` folder.
+* Download the [BSDS500  & PascalContext Dataset](https://1drv.ms/u/s!AtAJxn0z15QehBRUdGCzWZq9AN59), and unzip it into the `Super-BPD/data` folder.
 
 ## Testing
 
