@@ -4,6 +4,8 @@
 
 We propose direction-based super-BPD, an alternative to superpixel, for fast generic image segmentation, achieving state-of-the-art real-time result.
 
+![](figure/teaser.gif)
+
 ## Dataset
 * Download the [BSDS500  & PascalContext Dataset](https://drive.google.com/file/d/1OdfkelacNMmcp3STVyGzPql-Z21Efxqk/view?usp=sharing), and unzip it into the `Super-BPD/data` folder.
 
@@ -22,7 +24,7 @@ python setup.py install
 * [SEISM](https://github.com/jponttuset/seism) is used for evaluation of image segmentation.
 
 ## Training
-Download [VGG-16 pretrained model]().
+* Download [VGG-16 pretrained model](https://drive.google.com/file/d/13G5HaMQcZ-GsXL2nEaoC_2s3Sewmuag-/view?usp=sharing).
 
 ```
 python train.py --dataset PascalContext
