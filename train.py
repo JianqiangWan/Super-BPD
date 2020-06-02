@@ -154,6 +154,9 @@ def main():
 
             if global_step % 1e4 == 0:
                 torch.save(model.state_dict(), args.snapshot_dir + args.dataset + '_' + str(global_step) + '.pth')
+                
+            if global_step % 4e5 == 0:
+                return
 
 if __name__ == '__main__':
     main()
