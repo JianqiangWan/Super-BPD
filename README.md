@@ -6,6 +6,10 @@ We propose direction-based super-BPD, an alternative to superpixel, for fast gen
 
 ![](figure/teaser.gif)
 
+## Prerequisite
+* pytorch >= 1.3.0
+* g++ 7
+
 ## Dataset
 * Download the [BSDS500  & PascalContext Dataset](https://drive.google.com/file/d/1OdfkelacNMmcp3STVyGzPql-Z21Efxqk/view?usp=sharing), and unzip it into the `Super-BPD/data` folder.
 
