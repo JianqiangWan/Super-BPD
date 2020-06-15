@@ -6,6 +6,22 @@ We propose direction-based super-BPD, an alternative to superpixel, for fast gen
 
 ![](figure/teaser.gif)
 
+## Citation
+
+Please cite the related works in your publications if it helps your research:
+
+```
+
+@InProceedings{Wan_2020_CVPR,
+author = {Wan, Jianqiang and Liu, Yang and Wei, Donglai and Bai, Xiang and Xu, Yongchao},
+title = {Super-BPD: Super Boundary-to-Pixel Direction for Fast Image Segmentation},
+booktitle = {The IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+month = {June},
+year = {2020}
+}
+
+```
+
 ## Prerequisite
 * pytorch >= 1.3.0
 * g++ 7
